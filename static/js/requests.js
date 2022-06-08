@@ -39,7 +39,11 @@ async function requestFromServer({
             return res.text();
         }
     }).then(data => {
-        if (data.msg) createNotification(data.msg);
+        console.log(data);
+
+        const { msg, title, status, notificationLength } = data;
+
+        if (msg) createNotification(title, msg, status, notificationLength ? notificationLength : 3);
         if (func) func(data);
         return data;
     });

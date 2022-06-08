@@ -7,23 +7,22 @@
 
 const express = require('express');
 const path = require('path');
-
 const app = express();
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+app.use((req, res, next) => {
+    console.log(req.method + ' - ' + req.url);
+    next();
+});
+
+app.post('/*', (req, res, next) => {
+    console.log(req.body);
+    next();
+});
 
 // sends all static files
 app.use('/static', express.static(path.resolve(__dirname, './static')));
-
-// req = request object
-// res = response object
-
-// Get request
-app.get('/*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, './templates/your-dashboard.html'));
-});
-
-// Post reqest
-app.post('/*', (req, res) => {
-
-});
 
 app.listen(8080, () => console.log('Sever listening on port 8080...'));
