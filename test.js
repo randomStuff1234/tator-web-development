@@ -1,0 +1,1 @@
+// Run independent javascript here with command 'npm test'

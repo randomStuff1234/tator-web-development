@@ -1,0 +1,19 @@
+#background {
+    background-image: url('download.png');
+    background-size: contain;
+    width: 100%;
+    height: auto;
+}
+
+#field {
+    overflow: hidden;
+    height: 100%;
+    width: 100%;
+    color: transparent;
+}
+
+html,
+body {
+    margin: 0 !important;
+    padding: 0 !important;
+}
