@@ -11,14 +11,14 @@ const path = require('path');
 const app = express();
 
 // sends all static files
-app.use(express.static(path.resolve(__dirname, './static')));
+app.use('/static', express.static(path.resolve(__dirname, './static')));
 
 // req = request object
 // res = response object
 
 // Get request
 app.get('/*', (req, res) => {
-
+    res.sendFile(path.resolve(__dirname, './templates/your-dashboard.html'));
 });
 
 // Post reqest
