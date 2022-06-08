@@ -3,6 +3,8 @@
 
 // Run your server using 'npm start' (this will restart your server every time you save)
 
+// If you run into issues, copy and paste an error into google and look for 'stackoverflow'! That will probably explain better than I will! (It's how I learned how to code)
+
 const express = require('express');
 const path = require('path');
 
