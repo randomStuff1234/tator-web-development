@@ -27,11 +27,10 @@ async function requestFromServer({
     }
     console.log(`${method} Request: ${url}`);
     let options = {
-            method: method.toUpperCase(),
-            body: JSON.stringify(body),
-            headers: headers,
-        }
-        // // console.log(options.body);
+        method: method.toUpperCase(),
+        body: JSON.stringify(body),
+        headers: headers,
+    }
     return fetch(url, options).then(res => {
         try {
             return res.json();

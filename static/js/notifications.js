@@ -83,8 +83,6 @@ function createNotificationEl(title, msg, color) {
  * @param {Number} length in seconds 
  */
 function createNotification(title, msg, color, length) {
-    console.log(title, msg, color, length);
-
     let notification = createNotificationEl(title, msg, color);
 
     let removed = false;

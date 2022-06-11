@@ -5,15 +5,16 @@
 
 // If you run into issues, copy and paste an error into google and look for 'stackoverflow'! That will probably explain better than I will! (It's how I learned how to code)
 
-const express = require('express');
-const path = require('path');
+const express = require('express'); // server functions
+const path = require('path'); // getting a directory
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.use((req, res, next) => {
-    console.log(req.method + ' - ' + req.url);
+// Middleware!
+app.use('/*', (req, res, next) => {
+    console.log(`${req.method} - ${req.originalUrl}`);
     next();
 });
 
@@ -22,7 +23,10 @@ app.post('/*', (req, res, next) => {
     next();
 });
 
-// sends all static files
 app.use('/static', express.static(path.resolve(__dirname, './static')));
 
-app.listen(8080, () => console.log('Sever listening on port 8080...'));
+app.get('/*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, './templates/your-dashboard.html'));
+});
+
+app.listen(8080, () => console.log('----------------------------------------------------------\nServer Started on port 8080...'));
