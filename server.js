@@ -44,18 +44,36 @@ app.get("/userGames/:steamId", (req, res) => {
 
                 //Showing Owned Games
                 axios.get("http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=" + apiKey + "&steamid=" + req.params.steamId + "&format=json&include_appinfo=1&include_played_free_games=1").then ((games) => {
-                    //let strings = []
+                    let total = 0
                     for (let game of games.data.response.games) {
-                        console.log(game)
-                        axios.get("https://api.isthereanydeal.com/v02/game/plain/?key=2a2fc17c80b93372f570423e56c4eadc04d36934&shop=steam&game_id=app%" + game.appid)
-                            .then((cost) => {
-                                console.log(cost)
+                        axios.get("https://api.isthereanydeal.com/v02/game/plain/?key=2a2fc17c80b93372f570423e56c4eadc04d36934&shop=steam&title=" + game.name)
+                            .then((gameData) => {
+                                axios.get("https://api.isthereanydeal.com/v01/game/prices/?key=2a2fc17c80b93372f570423e56c4eadc04d36934&plains=" + gameData.data.data.plain)
+                                .then(cost => {
+                                    let costObject = cost.data.data[gameData.data.data.plain].list[0]
+                                    if (costObject) {
+                                        console.log(costObject.price_old)
+                                        total += costObject.price_old
+                                    } else {
+                                        console.log("No prices found for " + game.name)
+                                    }
+                                })
+                                .catch(e => {
+                                    console.error(e)
+                                })
                             })
                             .catch(e => {
-                                //console.error(e)
+                                console.error(e)
                             })
                     }
-                    res.send(JSON.stringify(games.data))
+                    let gamesString = "" 
+                    for (let game of games.data.response.games) {
+                        gamesString = gamesString.concat(game.name)
+                    }
+                    setTimeout(() => { 
+                        res.send(/*JSON.stringify(games.data) +*/ "Total: " +total + " Games: " + gamesString) 
+                    }, 3000)
+                    
                 })
 
             } else {
