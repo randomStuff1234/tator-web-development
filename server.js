@@ -33,45 +33,47 @@ app.post("/userMoney/:steamId", (req, res) => {
             //Testing if the account is visible
             if (userData.data.response.players[0].communityvisibilitystate == 3) {
                 //Showing Owned Games
-                axios.get("http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=" + apiKey + "&steamid=" + req.params.steamId + "&format=json&include_appinfo=1")
+                axios.get("http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=" + apiKey + "&steamid=" + req.params.steamId + "&format=json&include_appinfo=1%include_played_free_games=0")
                     .then ((gamesInfo) => {
-                    let total = 0
-                    let { games } = gamesInfo.data.response;
-                    const getGameCost = (i) => {
-                        if (i == games.length) {
-                            let gamesString = ""; 
-
-                            for (let game of games) gamesString += game.name + ", ";
-                            res.send("Total: $" + Math.round(total)/* + " Games: " + gamesString.slice(0, gamesString.length - 2)*/);
-                            return;
-                        }
-                        let { name } = games[i];
-                        axios.get("https://api.isthereanydeal.com/v02/game/plain/?key=2a2fc17c80b93372f570423e56c4eadc04d36934&shop=steam&title=" + name)
-                            .then((gameData) => {
-                                let plainGameName = gameData.data.data.plain
-                                console.log(plainGameName);
-                                axios.get("https://api.isthereanydeal.com/v01/game/prices/?key=2a2fc17c80b93372f570423e56c4eadc04d36934&shops=steam&plains=" + plainGameName)
-                                .then(cost => {
-                                    let costObject = cost.data.data[plainGameName].list[0];
-                                    if (costObject) {
-                                        console.log(costObject.price_old);
-                                        total += +costObject.price_old;
-                                    } else {
-                                        console.log("No prices found for " + name);
-                                    }
-                                    getGameCost(i + 1);
+                        let total = 0
+                        let i = 1
+                        let { games } = gamesInfo.data.response;
+                        for (let game of games) {
+                            let  { name } = game;
+                            axios.get("https://api.isthereanydeal.com/v02/game/plain/?key=2a2fc17c80b93372f570423e56c4eadc04d36934&shop=steam&title=" + name)
+                                .then((gameData) => {
+                                    let plainGameName = gameData.data.data.plain
+                                    
+                                    axios.get("https://api.isthereanydeal.com/v01/game/prices/?key=2a2fc17c80b93372f570423e56c4eadc04d36934&shops=steam&plains=" + plainGameName)
+                                    .then(cost => {
+                                        let costObject = cost.data.data[plainGameName].list[0];
+                                        if (costObject) {
+                                            //console.log(plainGameName + ": $" + costObject.price_old);
+                                            total += +costObject.price_old;
+                                        } else {
+                                            //console.log("No prices found for " + name);
+                                        }
+                                        i++
+                                        if (i == games.length) {
+                                            //let gamesString = ""; 
+                        
+                                            //for (let game of games) gamesString += game.name + ", ";
+                                            res.send("Total: $" + Math.round(total)/* + " Games: " + gamesString.slice(0, gamesString.length - 2)*/);
+                                            return;
+                                        }
+                                    })
+                                    .catch(e => {
+                                        console.error("error with user money spent for: " + req.params.steamId + " at the second money detection request. Game: " + name);
+                                        //console.log(plainGameName)
+                                        i ++
+                                    })
                                 })
                                 .catch(e => {
-                                    console.error("error with user money spent for: " + req.params.steamId + "at the second money detection request");
+                                    console.error("error with user money spent for: " + req.params.steamId + " at the first money detection request. Game: " + name);
+                                    i++
                                 })
-                            })
-                            .catch(e => {
-                                console.error("error with user money spent for: " + req.params.steamId + "at the first money detection request");
-                            })
-                    }
-                    getGameCost(0);
-                })
-
+                        }
+                    })
             } else {
                 res.send("private_profile")
             }
