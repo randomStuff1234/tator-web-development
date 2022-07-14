@@ -197,32 +197,27 @@
                         return; 
                     }
                     let people = JSON.parse(res)
-                    const addNameTo = (i) => {
-                        if (i == people.length) {
-                            setTable(friendsResults, friendsHeaders, people);
-                            return;
-                        }
-                        let person = people[i];
-                        findInfoForSteamId(person.steamid)
-                            .then((info) => {
-                                if (info == "private_profile") {
-                                    person.name = "Private Profile"
-                                } else if (info == "error") {
-                                    person.name = "Error :/"
-                                } else {
-                                    person.name = JSON.parse(info).response.players[0].personaname;
-                                }
-                                addNameTo(i + 1)
-                            })
-                            .catch(e => {
-                                console.error(e);
-                            })
+                    let i = 0
+                    for (let person of people) {
+                        findInfoForSteamId(person.steamid) 
+                        .then((info) => {
+                            if (info == "private_profile") {
+                                person.name = "Private Profile"
+                            } else if (info == "error") {
+                                person.name = "Error :/"
+                            } else {
+                                person.name = JSON.parse(info).response.players[0].personaname;
+                            }
+                            i++
+                            if (i == people.length) {
+                                setTable(friendsResults, friendsHeaders, people);
+                                return;
+                            }
+                        })
+                        .catch(e => {
+                            console.error(e);
+                        })             
                     }
-                    addNameTo(0);
-                    
-                })  
-                .catch((e) => {
-                    console.error(e)
                 })
         })
         /**

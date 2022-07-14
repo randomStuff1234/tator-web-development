@@ -36,7 +36,7 @@ app.post("/userMoney/:steamId", (req, res) => {
                 axios.get("http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=" + apiKey + "&steamid=" + req.params.steamId + "&format=json&include_appinfo=1%include_played_free_games=0")
                     .then ((gamesInfo) => {
                         let total = 0
-                        let i = 1
+                        let i = 0
                         let { games } = gamesInfo.data.response;
                         for (let game of games) {
                             let  { name } = game;
@@ -102,7 +102,7 @@ app.post("/userFriends/:steamId", (req, res) => {
                         res.json(friendsList.data.friendslist.friends)
                     })
                     //More "Error Handling"
-                    .catch( e => {
+                    .catch(e => {
                         console.error("error with user friends for: " + req.params.steamId + " (2nd error messagge)")
                         res.send("error")
                     })
