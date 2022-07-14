@@ -32,7 +32,7 @@
             </button>
 
             <!-- Brand -->
-            <a class="navbar-brand fw-bold me-auto" href="#" data-bs-target="#offcanvasExample">&nbsp; Dashboard </a>
+            <a class="navbar-brand fw-bold me-auto" href="#" data-bs-target="#offcanvasExample">&nbsp; Home </a>
 
 
         </div>
@@ -51,13 +51,20 @@
                     <!-- Keep them in this format! (copy paste then change href, data-target, then the contents accordingly) -->
                     <li>
                         <!-- href and data-target: #element-to-view -->
-                        <a href="/dashboard" class="nav-link px-3 active toggle-elements" data-toggle-class=".page" data-target="#dashboard">
+                        <a href="/money-spent" class="nav-link px-3 active toggle-elements" data-toggle-class=".page" data-target="#money-spent">
                             <span class="me-2">
-                                Dashboard
+                                Money Spent
                             </span>
                         </a>
                     </li>
-
+                    <li>
+                        <!-- href and data-target: #element-to-view -->
+                        <a href="/friends-list" class="nav-link px-3 active toggle-elements" data-toggle-class=".page" data-target="#friends-list">
+                            <span class="me-2">
+                                Friends List
+                            </span>
+                        </a>
+                    </li>
 
 
                 </ul>
@@ -73,10 +80,27 @@
         <!-- CREATE PAGES HERE! -->
 
         <!-- Be sure your links above correspond to the id here, notice #dashboard links to this element -->
-        <div class="container page" id="dashboard">
+        <div class="container page" id="money-spent">
             <!-- Make a page here -->
 
-            <h1 class="text-center">Your Page Here!</h1>
+            <h1 class="text-center">Your Money Spent on Steam Games!</h1>
+            <div class="form-outline">
+                <input type="search" id="form1" class="form-control" placeholder="Enter Your Steam ID Here" aria-label="Search" />
+            </div>
+            <h2 class="text-center" id = "totalCost"> Find Total!</h2>
+
+        </div>
+        <div class="container page" id="friends-list">
+            <!-- Make a page here -->
+
+            <h1 class="text-center">Your Steam Friends!</h1>
+            <div class="form-outline">
+                <input type="search" id="form2" class="form-control" placeholder="Enter Your Steam ID Here" aria-label="Search" />
+            </div>
+            <table id="friendsTable" class="table table-striped table-hover">
+                
+            </table>
+            <h2 class="text-center" id = "friendsButton"> Click Here!</h2>
 
         </div>
 
@@ -118,7 +142,113 @@
 
     <!-- My Scripts! -->
     <script>
-        console.log()
+        //Total Game Money
+        const button = document.querySelector('#totalCost');
+        const results = document.querySelector('#totalCost');
+        const inputForm = document.querySelector("#form1");
+        button.addEventListener("click", (e) => {
+            //results.innerHTML = "Loading!";
+            findTotalForSteamId(inputForm.value).then((res) => {
+                if (res == "private_profile") {
+                    alert("Your Profile Is Private :(");
+                    return; 
+                }
+                results.innerHTML = res;
+            })  
+        })
+        /**
+         * Tells you how much someone with the given steam id has spent on steam games
+         * @param {String} steamId The steam id of the person
+         * @returns {String}
+         */
+        async function findTotalForSteamId(steamId) {
+            res = await fetch('/userMoney/' + steamId, { method:'POST' });
+            text = await res.text();
+            return text;
+        }
+        //Friends List
+        const friendsButton = document.querySelector('#friendsButton');
+        const friendsResults = document.querySelector('#friendsTable');
+        const friendsInputForm = document.querySelector("#form2");
+        const friendsHeaders = [
+            {
+                title:'Name',
+                getData: (row) => {
+                    return row.name
+                }
+            },
+            {
+                title: 'Id',
+                getData: (row) => {
+                    return row.steamid;
+                }
+            }
+        ];
+        friendsButton.addEventListener("click", (e) => {
+            //friendsResults.innerHTML = "Loading!";
+            findFriendsForSteamId(friendsInputForm.value)
+                .then((res) => {
+                    if (res == "private_profile") {
+                        alert("Your Profile Is Private :(");
+                        return; 
+                    }
+                    if (res == "error") {
+                        alert("There was an error :|");
+                        return; 
+                    }
+                    let people = JSON.parse(res)
+                    const addNameTo = (i) => {
+                        if (i == people.length) {
+                            setTable(friendsResults, friendsHeaders, people);
+                            return;
+                        }
+                        let person = people[i];
+                        findInfoForSteamId(person.steamid)
+                            .then((info) => {
+                                if (info == "private_profile") {
+                                    person.name = "Private Profile"
+                                } else if (info == "error") {
+                                    person.name = "Error :/"
+                                } else {
+                                    person.name = JSON.parse(info).response.players[0].personaname;
+                                }
+                                addNameTo(i + 1)
+                            })
+                            .catch(e => {
+                                console.error(e);
+                            })
+                    }
+                    addNameTo(0);
+                    
+                })  
+                .catch((e) => {
+                    console.error(e)
+                })
+        })
+        /**
+         * Tells you how much someone with the given steam id has spent on steam games
+         * @param {String} steamId The steam id of the person
+         * @returns {String}
+         */
+        async function findFriendsForSteamId(steamId) {
+            
+            res = await fetch('/userFriends/' + steamId, { method:'POST' });
+            text = await res.text();
+            return text;
+        }
+        
+        //User Info
+        /**
+         * Tells you how much someone with the given steam id has spent on steam games
+         * @param {String} steamId The steam id of the person
+         * @returns {String}
+         */
+        async function findInfoForSteamId(steamId) {
+            
+            res = await fetch('/userInfo/' + steamId, { method:'POST' });
+            text = await res.text();
+            return text;
+        }
     </script>
 </body>
 
