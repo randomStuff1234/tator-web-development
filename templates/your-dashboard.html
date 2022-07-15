@@ -65,8 +65,14 @@
                             </span>
                         </a>
                     </li>
-
-
+                    <li>
+                        <!-- href and data-target: #element-to-view -->
+                        <a href="/money-spent-histogram" class="nav-link px-3 active toggle-elements" data-toggle-class=".page" data-target="#money-spent-histogram">
+                            <span class="me-2">
+                                Histogram of Game Costs
+                            </span>
+                        </a>
+                    </li>
                 </ul>
             </nav>
         </div>
@@ -87,8 +93,7 @@
             <div class="form-outline">
                 <input type="search" id="form1" class="form-control" placeholder="Enter Your Steam ID Here" aria-label="Search" />
             </div>
-            <h2 class="text-center" id = "totalCost"> Find Total!</h2>
-
+            <h2 class="text-center" id = "totalCost"> Click Here!</h2>
         </div>
         <div class="container page" id="friends-list">
             <!-- Make a page here -->
@@ -101,8 +106,18 @@
                 
             </table>
             <h2 class="text-center" id = "friendsButton"> Click Here!</h2>
-
         </div>
+        <div class="container page" id="money-spent-histogram">
+            <!-- Make a page here -->
+
+            <h1 class="text-center">Histogram of Your Games' Costs!</h1>
+            <div class="form-outline">
+                <input type="search" id="form3" class="form-control" placeholder="Enter Your Steam ID Here" aria-label="Search" />
+            </div>
+            <h2 class="text-center" id = "histogramButton"> Click Here!</h2>
+            <canvas id="histogram" width="10" height="5"></canvas>
+        </div>
+
 
         <!-- For each page, make your links above -->
 
@@ -147,12 +162,14 @@
         const results = document.querySelector('#totalCost');
         const inputForm = document.querySelector("#form1");
         button.addEventListener("click", (e) => {
-            //results.innerHTML = "Loading!";
+            button.innerHTML = "Loading!";
             findTotalForSteamId(inputForm.value).then((res) => {
                 if (res == "private_profile") {
+                    button.innerHTML = "Click Here!";
                     alert("Your Profile Is Private :(");
                     return; 
                 }
+                button.innerHTML = "Click Here!";
                 results.innerHTML = res;
             })  
         })
@@ -166,6 +183,8 @@
             text = await res.text();
             return text;
         }
+    </script>
+    <script>
         //Friends List
         const friendsButton = document.querySelector('#friendsButton');
         const friendsResults = document.querySelector('#friendsTable');
@@ -209,15 +228,17 @@
             }
         ];
         friendsButton.addEventListener("click", (e) => {
-            //friendsResults.innerHTML = "Loading!";
+            friendsButton.innerHTML = "Loading!";
             findFriendsForSteamId(friendsInputForm.value)
                 .then((res) => {
                     if (res == "private_profile") {
                         alert("Your Profile Is Private :(");
+                        friendsButton.innerHTML = "Click Here!";
                         return; 
                     }
                     if (res == "error") {
                         alert("There was an error :|");
+                        friendsButton.innerHTML = "Click Here!";
                         return; 
                     }
                     let people = JSON.parse(res)
@@ -228,7 +249,6 @@
                             if (info == "private_profile" || info == "error") {
                                 person.info = info
                             } else {
-                                console.log(info)
                                 person.info = JSON.parse(info).response.players[0];
                             }
                             i++
@@ -244,6 +264,7 @@
                                         }
                                         j++
                                         if (j == people.length) {
+                                            friendsButton.innerHTML = "Click Here!";
                                             setTable(friendsResults, friendsHeaders, people);
                                             return;
                                         }
@@ -260,6 +281,9 @@
                         })             
                     }
                 })
+                .catch((e) =>{
+                    console.error(e)
+                })
         })
         /**
          * Tells you how much someone with the given steam id has spent on steam games
@@ -272,7 +296,8 @@
             text = await res.text();
             return text;
         }
-        
+    </script>
+    <script>
         //User Info
         /**
          * Tells you how much someone with the given steam id has spent on steam games
@@ -282,6 +307,60 @@
         async function findInfoForSteamId(steamId) {
             
             res = await fetch('/userInfo/' + steamId, { method:'POST' });
+            text = await res.text();
+            return text;
+        }
+    </script>
+    <script>
+        //Friends List
+        const histogramButton = document.querySelector('#histogramButton');
+        const histogramResults = document.querySelector('#histogram').getContext('2d');
+        const histogramInputForm = document.querySelector("#form3");
+        let chart;
+        histogramButton.addEventListener("click", (e) => {
+            histogramButton.innerHTML = "Loading!";
+            if (chart) {
+                chart.destroy()
+            }
+            findHistogramForSteamId(histogramInputForm.value)
+                .then((res) => {
+                    if (res == "private_profile") {
+                        alert("Your Profile Is Private :(");
+                        friendsButton.innerHTML = "Click Here!";
+                        return; 
+                    }      
+                    if (res == "error") {
+                        alert("An Error Occured :(");
+                        friendsButton.innerHTML = "Click Here!";
+                        return; 
+                    }  
+                    histogramButton.innerHTML = "Click Here!"       
+                    chart = new Chart(histogramResults, {
+                        type: 'bar',
+                        data: {
+                            labels: ["Free", '0.01 - 5', '5.01 - 10', '10.01 - 15', '15.01 - 20', '20.01 - 50', '50.01+', 'Unknown'],
+                            datasets: [{
+                                label: "Number of Games",
+                                data: JSON.parse(res).data,
+                                backgroundColor: "green",
+                                barPercentage: 1.25 
+                            }]
+                        },
+                        options: {}
+                    })
+                })
+                .catch(e => {
+                    console.error(e);
+                })
+            })
+        /**
+         * Tells you how much someone with the given steam id has spent on steam games
+         * @param {String} steamId The steam id of the person
+         * @returns {String}
+         */
+        async function findHistogramForSteamId(steamId) {
+            
+            res = await fetch('/userHistogram/' + steamId, { method:'POST' });
             text = await res.text();
             return text;
         }

@@ -148,4 +148,82 @@ app.post("/userInfo/:steamId", (req, res) => {
     //axios.get("http://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v0001/?key=" + apiKey + "&steamid=" + req.params["steamId"] + "&format=json&include_appinfo=true&include_played_free_games=true")
 })
 
+app.post("/userHistogram/:steamId", (req, res) => {
+    //TODO: Don't publish my api key on public github b/c thats really stupid
+    const apiKey = "6C13C7F548AD28C60BECEDF430021DDB"
+    // Getting Axios a library to help with requesting APIs. It's docs can be found here: https://axios-http.com/docs
+    const axios = require('axios')
+
+    //Requesting user account info so I can test whether the user's profile is visible to me (because it is my api key)
+    axios.get("http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=" + apiKey + "&steamids=" + req.params.steamId + "&format=json")
+        .then((userData) => {
+            //Testing if the account is visible
+            if (userData.data.response.players[0].communityvisibilitystate == 3) {
+                //Showing Owned Games
+                axios.get("http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=" + apiKey + "&steamid=" + req.params.steamId + "&format=json&include_appinfo=1&include_played_free_games=1")
+                    .then ((gamesInfo) => {
+                        let data = [0, 0, 0, 0, 0, 0, 0, 0]
+                        let i = 0
+                        let { games } = gamesInfo.data.response;
+                        for (let game of games) {
+                            let  { name } = game;
+                            axios.get("https://api.isthereanydeal.com/v02/game/plain/?key=2a2fc17c80b93372f570423e56c4eadc04d36934&shop=steam&title=" + name)
+                                .then((gameData) => {
+                                    let plainGameName = gameData.data.data.plain
+                                    axios.get("https://api.isthereanydeal.com/v01/game/prices/?key=2a2fc17c80b93372f570423e56c4eadc04d36934&shops=steam&plains=" + plainGameName)
+                                    .then(cost => {
+                                        let priceObject = cost.data.data[plainGameName].list[0];
+                                        if (priceObject) {
+                                            let price = priceObject.price_old
+                                            if (price == 0) {
+                                                data[0] ++
+                                            }
+                                            if (price <= 20) {
+                                                data[Math.ceil(price/5)] ++
+                                            } else if (price < 50) {
+                                                data[6] ++
+                                            } else {
+                                                data [6] ++
+                                            }
+                                        } else {
+                                            data[7] ++
+                                        }
+                                        i++
+                                        if (i == games.length) {
+                                            let response = {
+                                                data:data
+                                            }   
+                                            res.json(response);
+                                            return;
+                                        }
+                                    })
+                                    .catch(e => {
+                                        //console.error(e)
+                                        data[7] ++
+                                        i ++
+                                    })
+                                })
+                                .catch(e => {
+                                    //console.error(e)
+                                    data[7] ++
+                                    i++
+                                })
+                        }
+                    })
+                    .catch(() =>{
+                        res.send("error")
+                        //console.log(games)
+                    })
+            } else {
+                res.send("private_profile")
+            }
+
+        })
+        //"Error Handling"
+        .catch (e => {
+            console.error("error with user money spent for: " + req.params.steamId)
+        })
+    //axios.get("http://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v0001/?key=" + apiKey + "&steamid=" + req.params["steamId"] + "&format=json&include_appinfo=true&include_played_free_games=true")
+})
+
 app.listen(8080, () => console.log('----------------------------------------------------------\nServer Started on port 8080...'));
