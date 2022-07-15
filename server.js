@@ -1,5 +1,6 @@
 const express = require('express'); // server functions
 const path = require('path'); // getting a directory
+const { createScanner } = require('typescript');
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
@@ -63,16 +64,20 @@ app.post("/userMoney/:steamId", (req, res) => {
                                         }
                                     })
                                     .catch(e => {
-                                        console.error("error with user money spent for: " + req.params.steamId + " at the second money detection request. Game: " + name);
+                                        //console.error("error with user money spent for: " + req.params.steamId + " at the second money detection request. Game: " + name);
                                         //console.log(plainGameName)
                                         i ++
                                     })
                                 })
                                 .catch(e => {
-                                    console.error("error with user money spent for: " + req.params.steamId + " at the first money detection request. Game: " + name);
+                                    //console.error("error with user money spent for: " + req.params.steamId + " at the first money detection request. Game: " + name);
                                     i++
                                 })
                         }
+                    })
+                    .catch(() =>{
+                        res.send("error")
+                        //console.log(games)
                     })
             } else {
                 res.send("private_profile")
@@ -130,7 +135,9 @@ app.post("/userInfo/:steamId", (req, res) => {
             if (userData.data.response.players[0].communityvisibilitystate == 3) {
                 res.json(userData.data)
             } else {
-                res.send("private_profile")
+                res.json(userData.data)
+                //res.send("private_profile")
+                console.log(userData.data.response)
             }
         })
         //"Error Handling"

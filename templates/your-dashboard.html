@@ -139,7 +139,7 @@
     <script src="../static/js/pages.js"></script>
     <script src="../static/js/script.js"></script>
     <script src="../static/js/notifications.js"></script>
-
+    
     <!-- My Scripts! -->
     <script>
         //Total Game Money
@@ -172,15 +172,39 @@
         const friendsInputForm = document.querySelector("#form2");
         const friendsHeaders = [
             {
+                title:'Avatar',
+                getData: (row) => {
+                    if (row.info == "error") {
+                        return "Error :/"
+                    } else if (row.info == "private_profile") {
+                        return "Private Profile"
+                    }
+                    let element = document.createElement("img")
+                    element.src = row.info.avatarmedium
+                    return element
+                }
+            },
+            {
                 title:'Name',
                 getData: (row) => {
-                    return row.name
+                    if (row.info == "error") {
+                        return "Error :/"
+                    } else if (row.info == "private_profile") {
+                        return "Private Profile"
+                    }
+                    return row.info.personaname
                 }
             },
             {
                 title: 'Id',
                 getData: (row) => {
                     return row.steamid;
+                }
+            },
+            {
+                title: 'Spendings',
+                getData: (row) => {
+                    return row.total
                 }
             }
         ];
@@ -201,16 +225,33 @@
                     for (let person of people) {
                         findInfoForSteamId(person.steamid) 
                         .then((info) => {
-                            if (info == "private_profile") {
-                                person.name = "Private Profile"
-                            } else if (info == "error") {
-                                person.name = "Error :/"
+                            if (info == "private_profile" || info == "error") {
+                                person.info = info
                             } else {
-                                person.name = JSON.parse(info).response.players[0].personaname;
+                                console.log(info)
+                                person.info = JSON.parse(info).response.players[0];
                             }
                             i++
                             if (i == people.length) {
-                                setTable(friendsResults, friendsHeaders, people);
+                                let j = 0
+                                for (let person of people) {
+                                    findTotalForSteamId(person.steamid) 
+                                    .then((total) => {
+                                        if (total == "private_profile" || total == "error") {
+                                            person.total = total
+                                        } else {
+                                            person.total = total.slice(6);
+                                        }
+                                        j++
+                                        if (j == people.length) {
+                                            setTable(friendsResults, friendsHeaders, people);
+                                            return;
+                                        }
+                                    })
+                                    .catch(e => {
+                                        console.error(e);
+                                    })             
+                                }
                                 return;
                             }
                         })
