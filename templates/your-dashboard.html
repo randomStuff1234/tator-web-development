@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>YOUR TITLE HERE</title>
+    <title>Steam Game Stuff</title>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -73,6 +73,30 @@
                             </span>
                         </a>
                     </li>
+                    <li>
+                        <!-- href and data-target: #element-to-view -->
+                        <a href="/games" class="nav-link px-3 active toggle-elements" data-toggle-class=".page" data-target="#games">
+                            <span class="me-2">
+                                Your Games
+                            </span>
+                        </a>
+                    </li>
+                    <li>
+                        <!-- href and data-target: #element-to-view -->
+                        <a href="/playtime" class="nav-link px-3 active toggle-elements" data-toggle-class=".page" data-target="#playtime">
+                            <span class="me-2">
+                                Your Playtime
+                            </span>
+                        </a>
+                    </li>
+                    <li>
+                        <!-- href and data-target: #element-to-view -->
+                        <a href="/playtimePrice" class="nav-link px-3 active toggle-elements" data-toggle-class=".page" data-target="#playtimePrice">
+                            <span class="me-2">
+                                Your Avg. Playtime per Price!
+                            </span>
+                        </a>
+                    </li>
                 </ul>
             </nav>
         </div>
@@ -84,40 +108,61 @@
 
 
         <!-- CREATE PAGES HERE! -->
-
-        <!-- Be sure your links above correspond to the id here, notice #dashboard links to this element -->
+        <!-- Be sure your links above corrspond to the id here, notice #dashboard links to this element -->
         <div class="container page" id="money-spent">
             <!-- Make a page here -->
-
             <h1 class="text-center">Your Money Spent on Steam Games!</h1>
             <div class="form-outline">
-                <input type="search" id="form1" class="form-control" placeholder="Enter Your Steam ID Here" aria-label="Search" />
+                <input type="search" id="moneyForm" class="form-control" placeholder="Enter Your Steam ID Here" aria-label="Search" />
             </div>
             <h2 class="text-center" id = "totalCost"> Click Here!</h2>
         </div>
         <div class="container page" id="friends-list">
             <!-- Make a page here -->
-
             <h1 class="text-center">Your Steam Friends!</h1>
             <div class="form-outline">
-                <input type="search" id="form2" class="form-control" placeholder="Enter Your Steam ID Here" aria-label="Search" />
+                <input type="search" id="friendsForm" class="form-control" placeholder="Enter Your Steam ID Here" aria-label="Search" />
             </div>
-            <table id="friendsTable" class="table table-striped table-hover">
-                
-            </table>
+            <table id="friendsTable" class="table table-striped table-hover"></table>
             <h2 class="text-center" id = "friendsButton"> Click Here!</h2>
         </div>
         <div class="container page" id="money-spent-histogram">
             <!-- Make a page here -->
-
             <h1 class="text-center">Histogram of Your Games' Costs!</h1>
             <div class="form-outline">
-                <input type="search" id="form3" class="form-control" placeholder="Enter Your Steam ID Here" aria-label="Search" />
+                <input type="search" id="histogramForm" class="form-control" placeholder="Enter Your Steam ID Here" aria-label="Search" />
             </div>
             <h2 class="text-center" id = "histogramButton"> Click Here!</h2>
             <canvas id="histogram" width="10" height="5"></canvas>
         </div>
+        <div class="container page" id="games">
+            <!-- Make a page here -->
+            <h1 class="text-center">Your Games!</h1>
+            <div class="form-outline">
+                <input type="search" id="gamesForm" class="form-control" placeholder="Enter Your Steam ID Here" aria-label="Search" />
+            </div>
+            <table id="gamesTable" class="table table-striped table-hover"></table>
+            <h2 class="text-center" id = "gamesButton"> Click Here!</h2>
 
+        </div>
+        <div class="container page" id="playtime">
+            <!-- Make a page here -->
+            <h1 class="text-center">Your Total Time Spent on Steam Games!</h1>
+            <div class="form-outline">
+                <input type="search" id="playtimeForm" class="form-control" placeholder="Enter Your Steam ID Here" aria-label="Search" />
+            </div>
+            <h2 class="text-center" id = "playtimeButton"> Click Here!</h2>
+        </div>
+        <div class="container page" id="playtimePrice">
+            <!-- Make a page here -->
+            <h1 class="text-center">Average Playtime per Price!</h1>
+            <div class="form-outline">
+                <input type="search" id="playtimePriceForm" class="form-control" placeholder="Enter Your Steam ID Here" aria-label="Search" />
+            </div>
+            <h2 class="text-center" id = "playtimePriceButton"> Click Here!</h2>
+            <canvas id="lineChart" width="10" height="5"></canvas>
+
+        </div>
 
         <!-- For each page, make your links above -->
 
@@ -160,7 +205,7 @@
         //Total Game Money
         const button = document.querySelector('#totalCost');
         const results = document.querySelector('#totalCost');
-        const inputForm = document.querySelector("#form1");
+        const inputForm = document.querySelector("#moneyForm");
         button.addEventListener("click", (e) => {
             button.innerHTML = "Loading!";
             findTotalForSteamId(inputForm.value).then((res) => {
@@ -188,7 +233,7 @@
         //Friends List
         const friendsButton = document.querySelector('#friendsButton');
         const friendsResults = document.querySelector('#friendsTable');
-        const friendsInputForm = document.querySelector("#form2");
+        const friendsInputForm = document.querySelector("#friendsForm");
         const friendsHeaders = [
             {
                 title:'Avatar',
@@ -312,10 +357,9 @@
         }
     </script>
     <script>
-        //Friends List
         const histogramButton = document.querySelector('#histogramButton');
         const histogramResults = document.querySelector('#histogram').getContext('2d');
-        const histogramInputForm = document.querySelector("#form3");
+        const histogramInputForm = document.querySelector("#histogramForm");
         let chart;
         histogramButton.addEventListener("click", (e) => {
             histogramButton.innerHTML = "Loading!";
@@ -326,12 +370,12 @@
                 .then((res) => {
                     if (res == "private_profile") {
                         alert("Your Profile Is Private :(");
-                        friendsButton.innerHTML = "Click Here!";
+                        histogramButton.innerHTML = "Click Here!";
                         return; 
                     }      
                     if (res == "error") {
                         alert("An Error Occured :(");
-                        friendsButton.innerHTML = "Click Here!";
+                        histogramButton.innerHTML = "Click Here!";
                         return; 
                     }  
                     histogramButton.innerHTML = "Click Here!"       
@@ -361,6 +405,196 @@
         async function findHistogramForSteamId(steamId) {
             
             res = await fetch('/userHistogram/' + steamId, { method:'POST' });
+            text = await res.text();
+            return text;
+        }
+    </script>
+    <script>
+        const gamesButton = document.querySelector('#gamesButton');
+        const gamesResults = document.querySelector('#gamesTable');
+        const gamesInputForm = document.querySelector("#gamesForm");
+        const gamesHeaders = [
+            {
+                title:'Icon',
+                getData: (row) => {
+                    let element = document.createElement("img");
+                    element.src = "http://media.steampowered.com/steamcommunity/public/images/apps/" + row.appid + "/" + row.img_icon_url + ".jpg";
+                    return element;
+                }
+            },    
+            {
+                title:'Name',
+                getData: (row) => {
+                    return row.name;
+                }
+            },
+            {
+                title: 'appId',
+                getData: (row) => {
+                    return row.appid;
+                }
+            },
+            {
+                title: "Price",
+                getData: (row) => {
+                    return row.price
+                }
+            },
+            {
+                title: 'Playtime (hours)',
+                getData: (row) => {
+                    return Math.floor(row.playtime_forever/60);
+                }
+            }
+        ];
+        gamesButton.addEventListener("click", (e) => {
+            gamesButton.innerHTML = "Loading!";
+            findGamesForSteamId(gamesInputForm.value)
+                .then((res) => {
+                    if (res == "private_profile") {
+                        alert("Your Profile Is Private :(");
+                        gamesButton.innerHTML = "Click Here!";
+                        return;
+                    }
+                    if (res == "error") {
+                        alert("There was an error :|"); 
+                        gamesButton.innerHTML = "Click Here!";
+                        return; 
+                    }
+                    let games = JSON.parse(res)
+                    let i = 0
+                    console.log(games)
+                    for (let game of games) {
+                            findPriceForGameName(game.name) 
+                                .then((price) => {
+                                    if (price  == "error") {
+                                        game.price = "Error"
+                                    } else {
+                                        game.price = price
+                                    }
+                                    i++
+                                    gamesButton.innerHTML = "Loading! " + (games.length - i) + " Games Left!";
+                                    if (i == games.length) {
+                                        gamesButton.innerHTML = "Click Here!";
+                                        setTable(gamesResults, gamesHeaders, games);
+                                        return;
+                                    }
+                                })
+                                .catch(e => {
+                                    console.error(e);
+                                })          
+                    }  
+                })
+                .catch((e) =>{
+                    console.error(e)
+                })
+        })
+        /**
+         * Tells you what games someone with the given steam id has
+         * @param {String} steamId The steam id of the person
+         * @returns {String}
+         */
+        async function findGamesForSteamId(steamId) {
+            res = await fetch('/userGames/' + steamId, { method:'POST' });
+            text = await res.text();
+            return text;
+        }
+        /**
+         * Tells you how much someone with the given steam id has spent on steam games
+         * @param {String} steamId The steam id of the person
+         * @returns {String}
+         */
+        async function findPriceForGameName(gameName) {
+            if (gameName.includes("/")) {
+                return "Unknown"
+            }
+            res = await fetch('/gameCost/' + gameName, { method:'POST' });
+            text = await res.text();
+            return text;
+        }
+
+    </script>
+    <script>
+        const playtimeButton = document.querySelector('#playtimeButton');
+        const playtimeResults = document.querySelector('#playtimeButton');
+        const playtimeInputForm = document.querySelector("#playtimeForm");
+        playtimeButton.addEventListener("click", (e) => {
+            playtimeButton.innerHTML = "Loading!";
+            findGamesForSteamId(playtimeInputForm.value)
+                .then((res) => {
+                    if (res == "private_profile") {
+                        alert("Your Profile Is Private :(");
+                        playtimeButton.innerHTML = "Click Here!";
+                        return;
+                    }
+                    if (res == "error") {
+                        alert("There was an error :|"); 
+                        playtimeButton.innerHTML = "Click Here!";
+                        return; 
+                    }
+
+                    let games = JSON.parse(res)
+                    let total = 0
+                    for (let game of games) {
+                        total += game.playtime_forever
+                    }   
+                    playtimeResults.innerHTML = Math.floor(total/60) + " Hours and " + total % 60 + " Minutes :/"
+                })
+                .catch((e) =>{
+                    console.error(e)
+                })
+        })
+    </script>
+    <script>
+        const playtimePriceButton = document.querySelector('#playtimePriceButton');
+        const playtimePriceResults = document.querySelector('#lineChart').getContext('2d');
+        const playtimePriceForm = document.querySelector("#playtimePriceForm");
+        let lChart;
+        playtimePriceButton.addEventListener("click", (e) => {
+            playtimePriceButton.innerHTML = "Loading!";
+            if (lChart) {
+                lChart.destroy();
+            }
+            findLineChartForSteamId(playtimePriceForm.value)
+                .then((res) => {
+                    playtimePriceButton.innerHTML = "Click Here!";
+                    if (res == "private_profile") {
+                        alert("Your Profile Is Private :(");
+                        return; 
+                    }      
+                    if (res == "error") {
+                        alert("An Error Occured :(");
+                        return; 
+                    }  
+                    res = JSON.parse(res).data.sort((a, b) => a.price - b.price)
+                    let labels = []
+                    let data = []
+                    for (let dataPoint of res) {
+                        labels.push(dataPoint.price.toString())
+
+                        data.push(dataPoint.playtime/dataPoint.count)
+                    }
+                    lChart = new Chart(playtimePriceResults, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: "Playtime For Price",
+                                data: data,
+                                fill: false,
+                                borderColor: 'rgb(0, 255, 0)',
+                                tension: 0.1
+                            }]
+                        },
+                        options: {}
+                    });
+                })
+                .catch(e => {
+                    console.error(e);
+                });
+            });
+        async function findLineChartForSteamId(steamId) {
+            res = await fetch('/userLineChart/' + steamId, { method:'POST' });
             text = await res.text();
             return text;
         }
