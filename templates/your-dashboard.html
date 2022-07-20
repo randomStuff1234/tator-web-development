@@ -571,8 +571,7 @@
                     let data = []
                     for (let dataPoint of res) {
                         labels.push(dataPoint.price.toString())
-
-                        data.push(dataPoint.playtime/dataPoint.count)
+                        data.push(dataPoint.playtime/dataPoint.count/60)
                     }
                     lChart = new Chart(playtimePriceResults, {
                         type: 'line',
